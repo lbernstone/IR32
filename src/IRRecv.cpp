@@ -34,6 +34,8 @@ bool IRRecv::start(const rmt_send_timing_t* timing_group, gpio_num_t rx_pin)
     _rb = NULL;
     rmt_get_ringbuf_handle(_channel, &_rb);
     rmt_rx_start(_channel, 1);
+    _timing = *timing_group;
+    _rx_pin = rx_pin;
     _active = true;
 }
 
@@ -50,8 +52,9 @@ int8_t IRRecv::available()
    return waiting;
 } 
 
-bool IRRecv::rx_check_in_range(int duration_ticks, int target_us, int margin_us)
+bool IRRecv::rx_check_in_range(int duration_ticks, int target_us)
 {
+    uint16_t margin_us = _margin_pct * target_us / 100;
     if(( RMT_ITEM_DURATION(duration_ticks) < (target_us + margin_us))
         && ( RMT_ITEM_DURATION(duration_ticks) > (target_us - margin_us))) {
         return true;
@@ -62,9 +65,8 @@ bool IRRecv::rx_check_in_range(int duration_ticks, int target_us, int margin_us)
 
 bool IRRecv::rx_header_if(rmt_item32_t* item)
 {
-    if((item->level0 != _timing.invert && item->level1 == _timing.invert)
-        && rx_check_in_range(item->duration0, _timing.header_mark_us, _timing.bit_margin)
-        && rx_check_in_range(item->duration1, _timing.zero_mark_us, _timing.bit_margin)) {
+    if(rx_check_in_range(item->duration0, _timing.header_mark_us)
+        && rx_check_in_range(item->duration1, _timing.header_space_us)) {
         return true;
     }
     return false;
@@ -72,9 +74,8 @@ bool IRRecv::rx_header_if(rmt_item32_t* item)
 
 bool IRRecv::rx_bit_one_if(rmt_item32_t* item)
 {
-    if((item->level0 != _timing.invert && item->level1 == _timing.invert)
-        && rx_check_in_range(item->duration0, _timing.one_mark_us, _timing.bit_margin)
-        && rx_check_in_range(item->duration1, _timing.one_space_us, _timing.bit_margin)) {
+    if( rx_check_in_range(item->duration0, _timing.one_mark_us)
+        && rx_check_in_range(item->duration1, _timing.one_space_us)) {
         return true;
     }
     return false;
@@ -82,78 +83,62 @@ bool IRRecv::rx_bit_one_if(rmt_item32_t* item)
 
 bool IRRecv::rx_bit_zero_if(rmt_item32_t* item)
 {
-    if((item->level0 != _timing.invert && item->level1 == _timing.invert)
-        && rx_check_in_range(item->duration0, _timing.zero_mark_us, _timing.bit_margin)
-        && rx_check_in_range(item->duration1, _timing.zero_space_us, _timing.bit_margin)) {
+    if( rx_check_in_range(item->duration0, _timing.zero_mark_us)
+        && rx_check_in_range(item->duration1, _timing.zero_space_us)) {
         return true;
     }
     return false;
 }
 
-int IRRecv::rx_parse_items(rmt_item32_t* item, int item_num, uint16_t* addr, uint16_t* data)
+uint32_t IRRecv::rx_parse_items(rmt_item32_t* item, int item_num)
 {
     int w_len = item_num;
     if(w_len < _timing.bit_length + 2) {
         log_e("Item length was only %d bit", w_len);
         return -1;
     }
-    int i = 0, j = 0;
     if(!rx_header_if(item++)) {
         return -1;
     }
-    uint16_t addr_t = 0;
-    for(j = 0; j < 16; j++) {
+    uint32_t data = 0;
+    for(uint8_t j = 0; j < _timing.bit_length; j++) {
         if(rx_bit_one_if(item)) {
-            addr_t |= (1 << j);
+            data <<= 1;
+            data += 1;
         } else if(rx_bit_zero_if(item)) {
-            addr_t |= (0 << j);
+            data <<= 1;
         } else {
             return -1;
         }
         item++;
-        i++;
     }
-    uint16_t data_t = 0;
-    for(j = 0; j < 16; j++) {
-        if(rx_bit_one_if(item)) {
-            data_t |= (1 << j);
-        } else if(rx_bit_zero_if(item)) {
-            data_t |= (0 << j);
-        } else {
-            return -1;
-        }
-        item++;
-        i++;
-    }
-    *addr = addr_t;
-    *data = data_t;
-    return i;
+    return data;
 }
 
+void dump_item(rmt_item32_t* item, size_t sz)
+{
+  for (int x=0; x<sz; x++) {
+    log_v("Count: %d  duration0: %d  duration1: %d\n", x,item[x].duration0,item[x].duration1);
+    if(item[x].duration1==0 || item[x].duration0 == 0 || item[x].duration1 > 0x7f00 || item[x].duration0 > 0x7f00) break;
+  }
+}
+ 
 uint32_t IRRecv::read()
 {
     if (!available()) return NULL;
     size_t rx_size = 0;
     rmt_item32_t* item = (rmt_item32_t*) xRingbufferReceive(_rb, &rx_size, RMT_RX_BUF_WAIT);
     if (!item) return NULL;
-    uint16_t rmt_addr;
-    uint16_t rmt_cmd;
+    dump_item(item,rx_size); 
+    uint32_t rx_data;
     int offset = 0;
-    while(1) {
-        //parse data value from ringbuffer.
-        int res = rx_parse_items(item + offset, rx_size / 4 - offset, &rmt_addr, &rmt_cmd);
-        if(res > 0) {
-            offset += res + 1;
-            log_i("RMT RCV --- addr: 0x%04x cmd: 0x%04x", rmt_addr, rmt_cmd);
-        } else {
-            break;
-        }
-    }
+    rx_data = rx_parse_items(item + offset, rx_size / 4 - offset);
     //after parsing the data, clear space in the ringbuffer.
     vRingbufferReturnItem(_rb, (void*) item);
-    log_v("Available after return: %d",available());
-    return rmt_cmd;
+    return rx_data;
 }    
+
+void IRRecv::setMargin(uint8_t margin_pct) {_margin_pct = margin_pct;}
 
 void IRRecv::stop()
 {
