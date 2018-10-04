@@ -16,7 +16,7 @@ class IRSend
     bool active();
 
   private:
-    inline void rmt_fill_item_level(rmt_item32_t* item, int high_us, int low_us);
+    void rmt_fill_item_level(rmt_item32_t* item, int high_us, int low_us);
     void rmt_fill_item_header(rmt_item32_t* item);
     void rmt_fill_item_bit_one(rmt_item32_t* item);
     void rmt_fill_item_bit_zero(rmt_item32_t* item);

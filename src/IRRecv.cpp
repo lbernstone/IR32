@@ -1,4 +1,5 @@
 #include "IRRecv.h"
+#include <algorithm>
 
 #define RMT_RX_BUF_SIZE 1000
 #define RMT_RX_BUF_WAIT 10
@@ -38,11 +39,8 @@ bool IRRecv::start(const rmt_send_timing_t* timing_group, gpio_num_t rx_pin)
     _rx_pin = rx_pin;
     _active = true;
 }
-
 bool IRRecv::start(const rmt_send_timing_t* timing_group, int rx_pin)
-{
-    return start(timing_group, (gpio_num_t) rx_pin);
-}
+    {return start(timing_group, (gpio_num_t) rx_pin);}
 
 int8_t IRRecv::available()
 {
@@ -139,6 +137,38 @@ uint32_t IRRecv::read()
 }    
 
 void IRRecv::setMargin(uint8_t margin_pct) {_margin_pct = margin_pct;}
+
+uint8_t timingGroupElement(char* tag)
+{
+   uint8_t counter = 0;
+   for (rmt_send_timing_t timing : timing_groups) {
+       if(timing.tag == tag) return counter;
+       counter++;
+   }
+}
+
+bool IRRecv::inPrefVector(uint8_t element)
+{
+    for (int x : _preferred) if (x == element) return true;
+    return false;
+}
+
+int IRRecv::setPreferred(char* timing_group)
+{
+    if(timing_group == NULL) {
+        _preferred.clear();
+        return 0;
+    }
+    int position = timingGroupElement(timing_group);
+    if(position < 0) {
+        return -1;
+    } else { 
+        if (!inPrefVector(position)) _preferred.push_back(position);
+        return _preferred.size();
+    } 
+}
+int IRRecv::setPreferred(String timing_group)
+    {return setPreferred(timing_group.c_str());}
 
 void IRRecv::stop()
 {

@@ -4,6 +4,7 @@
 #include "IR32.h"
 #include "Arduino.h"
 #include "driver/rmt.h"
+#include <algorithm>
 
 class IRRecv
 {
@@ -14,6 +15,9 @@ class IRRecv
     int8_t available();
     uint32_t read();
     void setMargin(uint8_t margin_pct);
+    bool inPrefVector(uint8_t element);
+    int setPreferred(char* timing_group);
+    int setPreferred(String timing_group);
     void stop();
     bool active();
 
@@ -27,6 +31,7 @@ class IRRecv
     rmt_send_timing_t _timing;
     gpio_num_t _rx_pin;
     uint8_t _margin_pct = 15;
+    std::vector<uint8_t> _preferred;
     RingbufHandle_t _rb = NULL;
     bool _active = false;
 };

@@ -50,7 +50,7 @@ bool IRSend::start(const rmt_send_timing_t* timing_group, int tx_pin)
     return start(timing_group, (gpio_num_t) tx_pin);
 }
 
-inline void IRSend::rmt_fill_item_level(rmt_item32_t* item, int high_us, int low_us)
+void IRSend::rmt_fill_item_level(rmt_item32_t* item, int high_us, int low_us)
 {
     item->level0 = 1;
     item->duration0 = (high_us) / 10 * RMT_TICK_10_US;

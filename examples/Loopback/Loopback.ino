@@ -1,13 +1,29 @@
-#define IR_RMT_SEND_SAMSUNG 1
+#define TX_PIN 25
+#define RX_PIN 26
+
 #include <IRSend.h>
+#include <IRRecv.h>
+#include <Ticker.h>
 
 IRSend remote1;
+IRRecv remote2;
+Ticker tkSend;
+
+void sendKey() {
+  remote1.send(0xE1419999);
+}
 
 void setup() {
-  remote1.start(&SAMSUNG_timing, 25);
+  Serial.begin(115200);
+  remote1.start(&LG32_timing, TX_PIN);
+  remote2.start(&LG32_timing, RX_PIN);
+  tkSend.attach(2, sendKey);  
 }
 
 void loop() {
-  remote1.send(0x88);
-  delay(2000);
+  while(remote2.available()){
+    uint32_t result = remote2.read();
+    if (result) Serial.printf("Received: 0x%x\n", result);
+  }
+  delay(100);
 }
