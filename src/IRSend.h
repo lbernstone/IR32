@@ -9,9 +9,14 @@ class IRSend
 {
   public:
     IRSend(rmt_channel_t channel=RMT_CHANNEL_1);
-    bool start(const rmt_send_timing_t* timing_group, int tx_pin);
-    bool start(const rmt_send_timing_t* timing_group, gpio_num_t tx_pin);
+    bool startRMT(uint8_t timing);
+    bool start(int tx_pin, char* timingGroup = "NEC");
+    bool start(gpio_num_t tx_pin, char* timingGroup);
+    bool start(int tx_pin, String timingGroup);
+    bool start(gpio_num_t tx_pin, String timingGroup);
     bool send(uint32_t code);
+    bool send(uint32_t code, uint8_t timing);
+    bool send(uint32_t code, char* timingGroup);
     void stop();
     bool active();
 
@@ -25,7 +30,7 @@ class IRSend
     void nec_build_item(rmt_item32_t* item, uint32_t cmd_data);
 
     rmt_channel_t _channel;
-    rmt_send_timing_t _timing;
+    uint8_t _timing;
     gpio_num_t _tx_pin;
     bool _active = false;
 };

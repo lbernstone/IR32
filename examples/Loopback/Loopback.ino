@@ -17,13 +17,16 @@ void setup() {
   Serial.begin(115200);
   remote1.start(&LG32_timing, TX_PIN);
   remote2.start(&LG32_timing, RX_PIN);
-  tkSend.attach(2, sendKey);  
+  tkSend.attach(2, sendKey); 
 }
 
-void loop() {
+void loop() { 
   while(remote2.available()){
-    uint32_t result = remote2.read();
-    if (result) Serial.printf("Received: 0x%x\n", result);
-  }
+    char* rcvGroup;
+    uint32_t result = remote2.read(rcvGroup);
+    if (result) {
+        Serial.printf("Received: %s/0x%x\n", rcvGroup, result);
+    }
+  }  
   delay(100);
 }

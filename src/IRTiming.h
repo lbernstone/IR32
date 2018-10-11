@@ -4,7 +4,7 @@
 #include "Arduino.h"
 
 typedef struct {
-    const char* tag;
+    char* tag;
     uint16_t carrier_freq_khz;
     uint8_t duty_cycle;
     uint8_t bit_length;
@@ -16,13 +16,14 @@ typedef struct {
     uint16_t zero_mark_us;
     uint16_t zero_space_us;
     uint16_t end_wait_us;
-} rmt_send_timing_t;
+} rmt_timing_t;
 
-    const rmt_send_timing_t NEC_timing = {"NEC", 38000, 33, 32, 0, 9000, 4500, 560, 1690, 560, 560, 560};
-    const rmt_send_timing_t LG_timing = {"LG", 38000, 33, 28, 0, 8500, 4250, 560, 1600, 560, 560, 800};
-    const rmt_send_timing_t LG32_timing = {"LG32", 38000, 33, 32, 0, 4500, 4500, 500, 1750, 500, 560, 8950};
-    const rmt_send_timing_t SAMSUNG_timing = {"samsung", 38000, 33, 32, 0, 4500, 4450, 560, 1600, 560, 560, 8950};
-    const rmt_send_timing_t timing_groups[] = {
+    const rmt_timing_t NEC_timing = {"NEC", 38000, 33, 32, 0, 9000, 4500, 560, 1690, 560, 560, 560};
+    const rmt_timing_t LG_timing = {"LG", 38000, 33, 28, 0, 8500, 4250, 560, 1600, 560, 560, 800};
+    const rmt_timing_t LG32_timing = {"LG32", 38000, 33, 32, 0, 4500, 4500, 500, 1750, 500, 560, 8950};
+    const rmt_timing_t SAMSUNG_timing = {"samsung", 38000, 33, 32, 0, 4500, 4450, 560, 1600, 560, 560, 8950};
+    const rmt_timing_t timing_groups[] = {
+      {0},
       {"NEC", 38000, 33, 32, 0, 9000, 4500, 560, 1690, 560, 560, 560},
       {"LG", 38000, 33, 28, 0, 8500, 4250, 560, 1600, 560, 560, 800},
       {"LG32", 38000, 33, 32, 0, 4500, 4500, 500, 1750, 500, 560, 8950},

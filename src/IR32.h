@@ -3,8 +3,6 @@
 
 #include "IRTiming.h"
 #include "IRKeymap.h"
-//#include "IRSend.h"
-//#include "IRRecv.h"
 
 #define RMT_CLK_DIV     100
 #define RMT_TICK_10_US (80000000/RMT_CLK_DIV/100000)
