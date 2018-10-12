@@ -79,8 +79,8 @@ bool IRRecv::rx_bit_one_if(rmt_item32_t* item, uint8_t timing)
 
 bool IRRecv::rx_bit_zero_if(rmt_item32_t* item, uint8_t timing)
 {
-    if( rx_check_in_range(item->duration0, _timing.zero_mark_us)
-        && rx_check_in_range(item->duration1, _timing.zero_space_us)) {
+    if( rx_check_in_range(item->duration0, timing_groups[timing].zero_mark_us)
+        && rx_check_in_range(item->duration1, timing_groups[timing].zero_space_us)) {
         return true;
     }
     return false;
