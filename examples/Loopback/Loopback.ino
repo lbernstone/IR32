@@ -15,8 +15,8 @@ void sendKey() {
 
 void setup() {
   Serial.begin(115200);
-  remote1.start(&LG32_timing, TX_PIN);
-  remote2.start(&LG32_timing, RX_PIN);
+  remote1.start(TX_PIN, "LG32");
+  remote2.start(RX_PIN);
   tkSend.attach(2, sendKey); 
 }
 
