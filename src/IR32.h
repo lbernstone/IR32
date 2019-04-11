@@ -9,7 +9,7 @@
 #include "Arduino.h"
 
 typedef struct {
-    char* tag;
+    const char* tag;
     uint16_t carrier_freq_khz;
     uint8_t duty_cycle;
     uint8_t bit_length;
@@ -24,7 +24,7 @@ typedef struct {
 } rmt_timing_t;
 
     const rmt_timing_t timing_groups[] = {
-      {0},
+      {"", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
       {"NEC", 38000, 33, 32, 0, 9000, 4500, 560, 1690, 560, 560, 560},
       {"samsung", 38000, 33, 32, 0, 4500, 4450, 560, 1600, 560, 560, 8950},
       {"LG", 38000, 33, 28, 0, 8500, 4250, 560, 1600, 560, 560, 800},

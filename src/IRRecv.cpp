@@ -37,6 +37,7 @@ bool IRRecv::start(gpio_num_t rx_pin)
     rmt_rx_start(_channel, 1);
     _rx_pin = rx_pin;
     _active = true;
+    return true; // FIXME: is that correct?
 }
 bool IRRecv::start(int rx_pin)
     {return start((gpio_num_t) rx_pin);}
@@ -121,16 +122,16 @@ void dump_item(rmt_item32_t* item, size_t sz)
  
 uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
 {
-    if (!available()) return NULL;
+    if (!available()) return 0;
          
     size_t rx_size = 0;
     rmt_item32_t* item = (rmt_item32_t*) xRingbufferReceive(_rb, &rx_size, RMT_RX_BUF_WAIT);
-    if (!item) return NULL;
+    if (!item) return 0;
     //after parsing the data, clear space in the ringbuffer.
     vRingbufferReturnItem(_rb, (void*) item);
     //dump_item(item,rx_size); 
     uint32_t rx_data;
-    uint8_t found_timing;
+    uint8_t found_timing = 0;
     for (uint8_t timing : _preferred) {
         rx_data = rx_parse_items(item, rx_size / 4, timing);
         if (rx_data) {
@@ -151,7 +152,7 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
         }
     }
     if (found_timing) {
-        timingGroup = timing_groups[found_timing].tag;
+        timingGroup = (char *)timing_groups[found_timing].tag;
     }
     return rx_data;
 }    
@@ -165,6 +166,7 @@ uint8_t timingGroupElement(char* tag)
        if(timing.tag == tag) return counter;
        counter++;
    }
+   return counter; // FIXME: is this correct?
 }
 
 bool IRRecv::inPrefVector(uint8_t element)

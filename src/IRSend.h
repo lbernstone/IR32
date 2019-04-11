@@ -10,8 +10,8 @@ class IRSend
   public:
     IRSend(rmt_channel_t channel=RMT_CHANNEL_1);
     bool startRMT(uint8_t timing);
-    bool start(int tx_pin, char* timingGroup = "NEC");
-    bool start(gpio_num_t tx_pin, char* timingGroup);
+    bool start(int tx_pin, const char* timingGroup = "NEC");
+    bool start(gpio_num_t tx_pin, const char* timingGroup);
     bool start(int tx_pin, String timingGroup);
     bool start(gpio_num_t tx_pin, String timingGroup);
     bool send(uint32_t code);
