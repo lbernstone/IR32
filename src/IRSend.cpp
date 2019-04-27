@@ -18,7 +18,7 @@ IRSend::IRSend(rmt_channel_t channel)
     _tx_pin = GPIO_NUM_MAX;
 }
 
-uint8_t findGroup(char* timingGroup)
+uint8_t findGroup(const char* timingGroup)
 {
     uint8_t counter = 0;
     for (rmt_timing_t timing : timing_groups) {
@@ -47,9 +47,10 @@ bool IRSend::startRMT(uint8_t timing)
     if (rmt_driver_install(rmt_tx.channel, 0, 0) != ESP_OK) return false;
     if (rmt_set_pin(_channel, RMT_MODE_TX, _tx_pin) != ESP_OK) return false;
     _timing = timing;
+    return true;
 }
 
-bool IRSend::start(gpio_num_t tx_pin, char* timingGroup)
+bool IRSend::start(gpio_num_t tx_pin, const char* timingGroup)
 {
     if (tx_pin > 33) {
        log_e("Invalid pin for RMT TX: %d", tx_pin);
@@ -63,10 +64,11 @@ bool IRSend::start(gpio_num_t tx_pin, char* timingGroup)
     _tx_pin = tx_pin;
     if (!startRMT(_timing)) return false;
     _active = true;
+    return true;
 }
 bool IRSend::start(gpio_num_t tx_pin, String timingGroup)
     {return start(tx_pin, timingGroup.c_str());}
-bool IRSend::start(int tx_pin, char* timingGroup)
+bool IRSend::start(int tx_pin, const char* timingGroup)
     {return start((gpio_num_t)tx_pin, timingGroup);}
 bool IRSend::start(int tx_pin, String timingGroup)
     {return start((gpio_num_t)tx_pin, timingGroup.c_str());}
@@ -148,11 +150,12 @@ bool IRSend::send(uint32_t code, uint8_t timing)
 	if (rmt_write_items(_channel, item, item_num, true) != ESP_OK) return false;
 	rmt_wait_tx_done(_channel,RMT_TX_WAIT);
 	free(item);
+    return true;
 }
-bool IRSend::send(uint32_t code, char* timingGroup)
-    {send(code, findGroup(timingGroup));}
+bool IRSend::send(uint32_t code, const char* timingGroup)
+    {return send(code, findGroup(timingGroup));}
 bool IRSend::send(uint32_t code)
-    {send(code, _timing);}
+    {return send(code, _timing);}
 
 void IRSend::stop() 
 {
