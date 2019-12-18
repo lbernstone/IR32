@@ -37,7 +37,7 @@ bool IRSend::startRMT(uint8_t timing)
     rmt_tx.mem_block_num = 1;
     rmt_tx.rmt_mode = RMT_MODE_TX;
     rmt_tx.tx_config.loop_en = false;
-    rmt_tx.tx_config.carrier_freq_hz = timing_groups[timing].carrier_freq_khz * 1000;
+    rmt_tx.tx_config.carrier_freq_hz = timing_groups[timing].carrier_freq_hz;
     rmt_tx.tx_config.carrier_duty_percent = timing_groups[timing].duty_cycle;
     rmt_tx.tx_config.carrier_level = RMT_CARRIER_LEVEL_HIGH;
     rmt_tx.tx_config.carrier_en = RMT_TX_CARRIER_EN;

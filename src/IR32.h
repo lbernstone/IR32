@@ -10,7 +10,7 @@
 
 typedef struct {
     const char* tag;
-    uint16_t carrier_freq_khz;
+    uint16_t carrier_freq_hz;
     uint8_t duty_cycle;
     uint8_t bit_length;
     bool invert;
