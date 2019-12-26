@@ -4,6 +4,7 @@
 #include "IR32.h"
 #include "Arduino.h"
 #include "driver/rmt.h"
+#include <stdexcept>      // std::out_of_range
 
 class IRSend
 {
@@ -17,6 +18,8 @@ class IRSend
     bool send(uint32_t code);
     bool send(uint32_t code, uint8_t timing);
     bool send(uint32_t code, const char* timingGroup);
+    bool send(std::string code);
+    bool send(std::string code, uint8_t timing);
     void stop();
     bool active();
 

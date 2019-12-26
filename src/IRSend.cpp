@@ -1,5 +1,4 @@
 #include "IRSend.h"
-#include "driver/rmt.h"
 
 #define RMT_TX_WAIT 250
 #define RMT_TX_DATA_NUM 1
@@ -155,6 +154,36 @@ bool IRSend::send(uint32_t code, uint8_t timing)
 bool IRSend::send(uint32_t code, const char* timingGroup)
     {return send(code, findGroup(timingGroup));}
 bool IRSend::send(uint32_t code)
+    {return send(code, _timing);}
+bool IRSend::send(std::string code, uint8_t timing)
+{
+    bool success = true;
+    if (code.empty())
+    {
+        log_e("String is empty. No message sent.");
+        return false;
+    }
+
+    for (int i=0; i<code.length(); i=i+4)
+    {
+        uint32_t code_part = 0;
+        try
+        {
+            code_part = code.at(i) << 24;
+            code_part = code.at(i+1) << 16;
+            code_part = code.at(i+2) << 8;
+            code_part = code.at(i+3);
+        }
+        catch (const std::out_of_range& oor)
+        {
+            log_w("code incomplete");
+        }
+        log_i("sending code 0x%x", code_part); //TODO: print format not correct
+        success = success & send(code_part, timing);
+    }
+    return success;
+}
+bool IRSend::send(std::string code)
     {return send(code, _timing);}
 
 void IRSend::stop() 
