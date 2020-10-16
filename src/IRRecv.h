@@ -17,7 +17,7 @@ class IRRecv
     uint32_t read(char* &timingGroup, bool preferredOnly=false);
     void setMargin(uint16_t margin_us);
     bool inPrefVector(uint8_t element);
-    int setPreferred(char* timing_group);
+    int setPreferred(const char* timing_group);
     int setPreferred(String timing_group);
     void stop();
     bool active();

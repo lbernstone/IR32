@@ -159,7 +159,7 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
 
 void IRRecv::setMargin(uint16_t margin_us) {_margin_us = margin_us;}
 
-uint8_t timingGroupElement(char* tag)
+uint8_t timingGroupElement(const char* tag)
 {
    uint8_t counter = 0;
    for (rmt_timing_t timing : timing_groups) {
@@ -175,7 +175,7 @@ bool IRRecv::inPrefVector(uint8_t element)
     return false;
 }
 
-int IRRecv::setPreferred(char* timing_group)
+int IRRecv::setPreferred(const char* timing_group)
 {
     if(timing_group == NULL) {
         _preferred.clear();
