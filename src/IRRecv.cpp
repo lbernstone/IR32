@@ -128,8 +128,6 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
     size_t rx_size = 0;
     rmt_item32_t* item = (rmt_item32_t*) xRingbufferReceive(_rb, &rx_size, RMT_RX_BUF_WAIT);
     if (!item) return 0;
-    //after parsing the data, clear space in the ringbuffer.
-    vRingbufferReturnItem(_rb, (void*) item);
     if (_dump) {
         dump_item(item,rx_size); 
     }
@@ -157,6 +155,8 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
             }
         }
     }
+    //after parsing the data, clear space in the ringbuffer.
+    vRingbufferReturnItem(_rb, (void*) item);
     if (found_timing) {
         timingGroup = (char*) timing_groups[found_timing].tag;
     }
