@@ -46,7 +46,7 @@ int8_t IRRecv::available()
 {
    if (!_active) return -1;
    UBaseType_t waiting;
-   vRingbufferGetInfo(_rb, NULL, NULL, NULL, &waiting);
+   vRingbufferGetInfo(_rb, NULL, NULL, NULL, NULL, &waiting);
    return waiting;
 } 
 
@@ -115,7 +115,7 @@ uint32_t IRRecv::rx_parse_items(rmt_item32_t* item, int item_num, uint8_t timing
 void dump_item(rmt_item32_t* item, size_t sz)
 {
   for (int x=0; x<sz; x++) {
-    log_v("Count: %d  duration0: %d  duration1: %d\n", x,item[x].duration0,item[x].duration1);
+    log_v("Count: %dus  duration0: %dus  duration1: %d", x,RMT_ITEM_DURATION(item[x].duration0),RMT_ITEM_DURATION(item[x].duration1));
     if(item[x].duration1==0 || item[x].duration0 == 0 || item[x].duration1 > 0x7f00 || item[x].duration0 > 0x7f00) break;
   }
 }
@@ -198,7 +198,6 @@ void IRRecv::stop()
     _rx_pin = GPIO_NUM_MAX;
     _timing = {};
     _active = false;
-    vRingbufferDelete(_rb);
 }
 
 bool IRRecv::active() {return _active;}    

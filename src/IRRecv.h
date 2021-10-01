@@ -4,6 +4,7 @@
 #include "IR32.h"
 #include "Arduino.h"
 #include "driver/rmt.h"
+#include <vector>
 
 class IRRecv
 {
