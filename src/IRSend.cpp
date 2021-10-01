@@ -44,7 +44,7 @@ bool IRSend::startRMT(uint8_t timing)
     rmt_tx.tx_config.idle_output_en = RMT_TX_IDLE_EN;
     if (rmt_config(&rmt_tx) != ESP_OK) return false;
     if (rmt_driver_install(rmt_tx.channel, 0, 0) != ESP_OK) return false;
-    if (rmt_set_pin(_channel, RMT_MODE_TX, _tx_pin) != ESP_OK) return false;
+    if (rmt_set_gpio(_channel, RMT_MODE_TX, _tx_pin, timing_groups[timing].invert) != ESP_OK) return false;
     _timing = timing;
     return true;
 }
