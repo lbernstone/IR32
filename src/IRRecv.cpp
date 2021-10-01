@@ -115,11 +115,12 @@ uint32_t IRRecv::rx_parse_items(rmt_item32_t* item, int item_num, uint8_t timing
 void dump_item(rmt_item32_t* item, size_t sz)
 {
   for (int x=0; x<sz; x++) {
-    log_v("Count: %dus  duration0: %dus  duration1: %d", x,RMT_ITEM_DURATION(item[x].duration0),RMT_ITEM_DURATION(item[x].duration1));
+    // print item times in microseconds so its easy to use this to build a new timing entry.
+    log_i("Count: %d  duration0: %dus  duration1: %dus", x,RMT_ITEM_DURATION(item[x].duration0),RMT_ITEM_DURATION(item[x].duration1));
     if(item[x].duration1==0 || item[x].duration0 == 0 || item[x].duration1 > 0x7f00 || item[x].duration0 > 0x7f00) break;
   }
 }
- 
+
 uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
 {
     if (!available()) return 0;
@@ -129,7 +130,9 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
     if (!item) return 0;
     //after parsing the data, clear space in the ringbuffer.
     vRingbufferReturnItem(_rb, (void*) item);
-    //dump_item(item,rx_size); 
+    if (_dump) {
+        dump_item(item,rx_size); 
+    }
     uint32_t rx_data;
     uint8_t found_timing = 0;
     for (uint8_t timing : _preferred) {
@@ -139,7 +142,10 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
             break;
         }
     }
-    if (!rx_data) {
+    // if we did not parse the item from the prefered list then
+    // check the non-prefered items as well, but only if
+    // preferedOnly is not set.
+    if (!rx_data && !preferredOnly) {
         uint8_t groupCount = sizeof(timing_groups)/sizeof(timing_groups[0]);
         for (uint8_t timing = 0; timing < groupCount; timing++) {
             if (!inPrefVector(timing)) {
@@ -158,6 +164,8 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
 }    
 
 void IRRecv::setMargin(uint16_t margin_us) {_margin_us = margin_us;}
+
+void IRRecv::setDump(bool dump) {_dump = dump;}
 
 uint8_t timingGroupElement(const char* tag)
 {
