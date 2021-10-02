@@ -91,7 +91,7 @@ uint32_t IRRecv::rx_parse_items(rmt_item32_t* item, int item_num, uint8_t timing
 {
     int w_len = item_num;
     if(w_len < timing_groups[timing].bit_length + 2) {
-        log_w("Item length was only %d bit", w_len);
+        log_v("Item length was only %d bit", w_len);
         return 0;
     }
     if(!rx_header_if(item++, timing)) {
@@ -128,9 +128,6 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
     size_t rx_size = 0;
     rmt_item32_t* item = (rmt_item32_t*) xRingbufferReceive(_rb, &rx_size, RMT_RX_BUF_WAIT);
     if (!item) return 0;
-    if (_dump) {
-        dump_item(item,rx_size); 
-    }
     uint32_t rx_data;
     uint8_t found_timing = 0;
     for (uint8_t timing : _preferred) {
@@ -142,7 +139,7 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
     }
     // if we did not parse the item from the prefered list then
     // check the non-prefered items as well, but only if
-    // preferedOnly is not set.
+    // preferredOnly is not set.
     if (!rx_data && !preferredOnly) {
         uint8_t groupCount = sizeof(timing_groups)/sizeof(timing_groups[0]);
         for (uint8_t timing = 0; timing < groupCount; timing++) {
@@ -155,17 +152,22 @@ uint32_t IRRecv::read(char* &timingGroup, bool preferredOnly)
             }
         }
     }
-    //after parsing the data, clear space in the ringbuffer.
-    vRingbufferReturnItem(_rb, (void*) item);
     if (found_timing) {
         timingGroup = (char*) timing_groups[found_timing].tag;
+    } else {
+        log_w("read() item with length %u not parsed!", rx_size / 4);
+        if (_dump_unknown) {
+            dump_item(item,rx_size); 
+        }
     }
+    //after parsing the data, clear space in the ringbuffer.
+    vRingbufferReturnItem(_rb, (void*) item);
     return rx_data;
 }    
 
 void IRRecv::setMargin(uint16_t margin_us) {_margin_us = margin_us;}
 
-void IRRecv::setDump(bool dump) {_dump = dump;}
+void IRRecv::setDumpUnknown(bool dump) {_dump_unknown = dump;}
 
 uint8_t timingGroupElement(const char* tag)
 {

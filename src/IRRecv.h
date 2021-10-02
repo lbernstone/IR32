@@ -17,7 +17,7 @@ class IRRecv
     int8_t available();
     uint32_t read(char* &timingGroup, bool preferredOnly=false);
     void setMargin(uint16_t margin_us);
-    void setDump(bool dump);
+    void setDumpUnknown(bool dump);
     bool inPrefVector(uint8_t element);
     int setPreferred(const char* timing_group);
     int setPreferred(String timing_group);
@@ -37,6 +37,6 @@ class IRRecv
     std::vector<uint8_t> _preferred;
     RingbufHandle_t _rb = NULL;
     bool _active = false;
-    bool _dump = false;
+    bool _dump_unknown = false;
 };
 #endif // _IRRECV_H_ 
