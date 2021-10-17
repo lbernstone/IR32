@@ -47,7 +47,11 @@ int8_t IRRecv::available()
 {
    if (!_active) return -1;
    UBaseType_t waiting;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4,0,0) // versions 4+ added an extra arg to vRingbufferGetInfo
    vRingbufferGetInfo(_rb, NULL, NULL, NULL, NULL, &waiting);
+#else
+   vRingbufferGetInfo(_rb, NULL, NULL, NULL, &waiting);
+#endif
    return waiting;
 } 
 
