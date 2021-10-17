@@ -31,6 +31,7 @@ bool IRRecv::start(gpio_num_t rx_pin)
     rmt_rx.rx_config.idle_threshold = RMT_IDLE_TIMEOUT;
 
     if (rmt_config(&rmt_rx) != ESP_OK) return false;
+    if (rmt_set_source_clk(_channel, RMT_BASECLK_APB) != ESP_OK) return false;
     if (rmt_driver_install(_channel, RMT_RX_BUF_SIZE, 0) != ESP_OK) return false;
     _rb = NULL;
     rmt_get_ringbuf_handle(_channel, &_rb);
