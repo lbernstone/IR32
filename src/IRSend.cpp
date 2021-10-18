@@ -29,9 +29,7 @@ uint8_t findGroup(const char* timingGroup)
 
 bool IRSend::startRMT(uint8_t timing)
 {
-    rmt_config_t rmt_tx;
-    rmt_tx.channel = _channel;
-    rmt_tx.gpio_num = _tx_pin;
+    rmt_config_t rmt_tx = RMT_DEFAULT_CONFIG_TX(_tx_pin, _channel);
     rmt_tx.clk_div = RMT_CLK_DIV;
     rmt_tx.mem_block_num = 1;
     rmt_tx.rmt_mode = RMT_MODE_TX;
