@@ -20,9 +20,7 @@ IRRecv::IRRecv(rmt_channel_t channel)
 
 bool IRRecv::start(gpio_num_t rx_pin)
 {
-    rmt_config_t rmt_rx;
-    rmt_rx.channel = _channel;
-    rmt_rx.gpio_num = rx_pin;
+    rmt_config_t rmt_rx = RMT_DEFAULT_CONFIG_RX(rx_pin, _channel);
     rmt_rx.clk_div = RMT_CLK_DIV;
     rmt_rx.mem_block_num = 1;
     rmt_rx.rmt_mode = RMT_MODE_RX;
@@ -31,7 +29,6 @@ bool IRRecv::start(gpio_num_t rx_pin)
     rmt_rx.rx_config.idle_threshold = RMT_IDLE_TIMEOUT;
 
     if (rmt_config(&rmt_rx) != ESP_OK) return false;
-    if (rmt_set_source_clk(_channel, RMT_BASECLK_APB) != ESP_OK) return false;
     if (rmt_driver_install(_channel, RMT_RX_BUF_SIZE, 0) != ESP_OK) return false;
     _rb = NULL;
     rmt_get_ringbuf_handle(_channel, &_rb);
