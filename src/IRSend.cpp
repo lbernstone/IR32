@@ -29,9 +29,7 @@ uint8_t findGroup(const char* timingGroup)
 
 bool IRSend::startRMT(uint8_t timing)
 {
-    rmt_config_t rmt_tx;
-    rmt_tx.channel = _channel;
-    rmt_tx.gpio_num = _tx_pin;
+    rmt_config_t rmt_tx = RMT_DEFAULT_CONFIG_TX(_tx_pin, _channel);
     rmt_tx.clk_div = RMT_CLK_DIV;
     rmt_tx.mem_block_num = 1;
     rmt_tx.rmt_mode = RMT_MODE_TX;
@@ -44,7 +42,11 @@ bool IRSend::startRMT(uint8_t timing)
     rmt_tx.tx_config.idle_output_en = RMT_TX_IDLE_EN;
     if (rmt_config(&rmt_tx) != ESP_OK) return false;
     if (rmt_driver_install(rmt_tx.channel, 0, 0) != ESP_OK) return false;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4,4,0) // versions after 4.3.X changed `rmt_set_pin` to `rmt_set_gpio`
+    if (rmt_set_gpio(_channel, RMT_MODE_TX, _tx_pin, false) != ESP_OK) return false;
+#else
     if (rmt_set_pin(_channel, RMT_MODE_TX, _tx_pin) != ESP_OK) return false;
+#endif
     _timing = timing;
     return true;
 }
